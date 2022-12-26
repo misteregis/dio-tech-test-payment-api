@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using PaymentAPI.Schemas;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -21,9 +22,11 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // using System.Reflection;
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    options.IncludeXmlComments(xmlPath);
+
+    options.SchemaFilter<SwaggerEnumFilter>(xmlPath);
 });
 
 var app = builder.Build();
