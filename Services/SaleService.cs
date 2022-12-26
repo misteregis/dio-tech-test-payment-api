@@ -11,17 +11,9 @@
             return _salesList;
         }
 
-        public Sale CreateSale(
-            int orderId,
-            int sellerId,
-            string userCpf,
-            string userName,
-            string userEmail,
-            string userPhoneNumber,
-            List<Product> products
-        )
+        public Sale CreateSale(int orderId, Seller seller, List<Product> products)
         {
-            Sale sale = new(orderId, new Seller(sellerId, userCpf, userName, userEmail, userPhoneNumber));
+            Sale sale = new(orderId, seller);
 
             AddProductsToSale(sale, products);
 
@@ -38,9 +30,7 @@
         private static void AddProductsToSale(Sale sale, List<Product> products)
         {
             foreach (var product in products)
-            {
                 sale.AddProduct(new Product(product.Name));
-            }
         }
 
         public Sale UpdateSaleStatus(Sale sale, EnumSaleStatus saleStatus)
@@ -66,11 +56,10 @@
                 { EnumSaleStatus.SentToCarrier, sentToCarrier }
             };
 
-            if (saleStatusList.ContainsKey(sale.Status))
-            {
-                if (saleStatusList[sale.Status].Contains(saleStatus))
-                    sale.Status = saleStatusList[sale.Status].Find(x => x == saleStatus);
-            }
+            if (!saleStatusList.ContainsKey(sale.Status)) return sale;
+
+            if (saleStatusList[sale.Status].Contains(saleStatus))
+                sale.Status = saleStatusList[sale.Status].Find(x => x == saleStatus);
 
             return sale;
         }
