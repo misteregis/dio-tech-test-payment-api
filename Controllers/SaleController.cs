@@ -26,10 +26,10 @@
             if (products.Count == 0)
                 return BadRequest(new { message = "Por favor, adicione ao menos um produto!" });
 
+            var sellerId = seller.Id > 0 ? seller.Id : 1;
             var sales = _saleService.GetSalesList();
             var orderId = sales.Any() ? (sales.Max(sale => sale.Id) + 1) : 1;
-            var currentSeller = _sellerService.GetSellersList().Find(x => x.Id == seller.Id);
-            var sellerId = seller.Id > 0 ? seller.Id : 1;
+            var currentSeller = _sellerService.GetSellersList().Find(x => x.Id == sellerId);
 
             if (currentSeller != null)
             {
@@ -71,17 +71,9 @@
             if (sale == null)
                 return NotFound();
 
-            var oldSaleStatus = sale.Status;
+            var response = _saleService.UpdateSaleStatus(sale, saleStatus);
 
-            if (oldSaleStatus == EnumSaleStatus.Canceled)
-                return Ok(new { message = "Este pedido foi cancelado!" });
-
-            if (oldSaleStatus == EnumSaleStatus.Delivered)
-                return Ok(new { message = "Este pedido já foi entregue!" });
-
-            _saleService.UpdateSaleStatus(sale, saleStatus);
-
-            return sale.Status == oldSaleStatus ? Ok(new { message = "Não houve alteração!" }) : Ok(sale);
+            return Ok(response.Last() ?? response.First());
         }
 
         [HttpGet("{orderId:int}")]

@@ -1,6 +1,8 @@
 ﻿namespace PaymentAPI.Services
 {
     using Models;
+    using Extensions;
+    using System.Collections.Generic;
 
     public class SaleService
     {
@@ -33,9 +35,11 @@
                 sale.AddProduct(new Product(product.Name));
         }
 
-        public Sale UpdateSaleStatus(Sale sale, EnumSaleStatus saleStatus)
+        public object[] UpdateSaleStatus(Sale sale, EnumSaleStatus saleStatus)
         {
-            List <EnumSaleStatus> pendingPayment = new()
+            object[] response = { sale, null };
+
+            List<EnumSaleStatus> pendingPayment = new()
             {
                 EnumSaleStatus.ApprovedPayment,
                 EnumSaleStatus.Canceled
@@ -56,12 +60,30 @@
                 { EnumSaleStatus.SentToCarrier, sentToCarrier }
             };
 
-            if (!saleStatusList.ContainsKey(sale.Status)) return sale;
+            var message = sale.Status switch
+            {
+                EnumSaleStatus.Canceled => new { message = "Este pedido foi cancelado!" },
+                EnumSaleStatus.Delivered => new { message = "Este pedido já foi entregue!" },
+                _ => new { message = "Não houve alteração!" }
+            };
+            
+            if (!saleStatusList.ContainsKey(sale.Status))
+                return new object[] { sale, message };
+
+            var allowed = saleStatusList[sale.Status];
 
             if (saleStatusList[sale.Status].Contains(saleStatus))
-                sale.Status = saleStatusList[sale.Status].Find(x => x == saleStatus);
+                sale.Status = allowed.Find(x => x == saleStatus);
+            else
+            {
+                var list = new List<string>();
 
-            return sale;
+                allowed.ForEach(x => list.Add(x.GetEnumMemberValue()));
+
+                response[1] = new { message = $"Desculpe, este pedido só pode ser alterado para \"{string.Join("\" ou \"", list)}\"" };
+            }
+
+            return response;
         }
     }
 }

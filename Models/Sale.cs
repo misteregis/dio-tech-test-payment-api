@@ -5,10 +5,11 @@
 
     public class Sale
     {
+        [JsonProperty(PropertyName = "orderId", Order = -2)]
         public int Id { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
-        public EnumSaleStatus Status { get; set; }
+        public EnumSaleStatus Status;
 
         public DateTime SaleDate { get; set; }
 
@@ -21,12 +22,8 @@
             Id = id;
             SaleDate = DateTime.Now;
             Seller = seller;
-            Status = EnumSaleStatus.PendingPayment;
         }
 
-        public void AddProduct(Product product)
-        {
-            Products.Add(product);
-        }
+        public void AddProduct(Product product) => Products.Add(product);
     }
 }
