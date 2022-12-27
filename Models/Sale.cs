@@ -2,28 +2,20 @@
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using System.Text.Json.Serialization;
 
     public class Sale
     {
-        [JsonProperty(PropertyName = "orderId", Order = -2)]
-        public int Id { get; set; }
+        [JsonPropertyName("orderId"), JsonProperty(PropertyName = "orderId", Order = -2)]
+        public int Id;
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
         public EnumSaleStatus Status;
 
-        public DateTime SaleDate { get; set; }
+        public DateTime SaleDate = DateTime.Now;
 
         public Seller Seller { get; set; }
 
-        public List<Product> Products { get; set; } = new();
-
-        public Sale(int id, Seller seller)
-        {
-            Id = id;
-            SaleDate = DateTime.Now;
-            Seller = seller;
-        }
-
-        public void AddProduct(Product product) => Products.Add(product);
+        public List<Product> Products { get; set; }
     }
 }

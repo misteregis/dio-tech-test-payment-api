@@ -8,32 +8,11 @@
     {
         private readonly List<Sale> _salesList = new();
 
-        public List<Sale> GetSalesList()
-        {
-            return _salesList;
-        }
+        public List<Sale> GetSalesList() => _salesList;
 
-        public Sale CreateSale(int orderId, Seller seller, List<Product> products)
-        {
-            Sale sale = new(orderId, seller);
+        public Sale GetSale(int id) => _salesList.Find(s => s.Id == id);
 
-            AddProductsToSale(sale, products);
-
-            AddSaleToSaleList(sale);
-
-            return sale;
-        }
-
-        private void AddSaleToSaleList(Sale sale)
-        {
-            _salesList.Add(sale);
-        }
-
-        private static void AddProductsToSale(Sale sale, List<Product> products)
-        {
-            foreach (var product in products)
-                sale.AddProduct(new Product(product.Name));
-        }
+        public void AddSale(Sale sale) => _salesList.Add(sale);
 
         public object[] UpdateSaleStatus(Sale sale, EnumSaleStatus saleStatus)
         {
@@ -66,7 +45,7 @@
                 EnumSaleStatus.Delivered => new { message = "Este pedido já foi entregue!" },
                 _ => new { message = "Não houve alteração!" }
             };
-            
+
             if (!saleStatusList.ContainsKey(sale.Status))
                 return new object[] { sale, message };
 
@@ -76,11 +55,11 @@
                 sale.Status = allowed.Find(x => x == saleStatus);
             else
             {
-                var list = new List<string>();
+                var messages = new List<string>();
 
-                allowed.ForEach(x => list.Add(x.GetEnumMemberValue()));
+                allowed.ForEach(x => messages.Add(x.GetEnumMemberValue()));
 
-                response[1] = new { message = $"Desculpe, este pedido só pode ser alterado para \"{string.Join("\" ou \"", list)}\"" };
+                response[1] = new { message = $"Desculpe, este pedido só pode ser alterado para \"{string.Join("\" ou \"", messages)}\"" };
             }
 
             return response;

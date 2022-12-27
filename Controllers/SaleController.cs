@@ -20,42 +20,39 @@
             _saleService = saleServiceOptions.Value;
         }
 
-        [HttpPost("RegisterSale")]
-        public IActionResult RegisterSale([FromQuery] Seller seller, [Required] List<Product> products)
+        [HttpPost]
+        public IActionResult RegisterSale([Required] Sale sale)
         {
-            if (products.Count == 0)
-                return BadRequest(new { message = "Por favor, adicione ao menos um produto!" });
+            if (sale.Seller == null)
+                return BadRequest(new { message = "É obrigatório um vendedor!" });
 
-            var sellerId = seller.Id > 0 ? seller.Id : 1;
+            if (!sale.Products.Any())
+                return BadRequest(new { message = "É obrigatório ter ao menos um produto!" });
+
             var sales = _saleService.GetSalesList();
-            var orderId = sales.Any() ? (sales.Max(sale => sale.Id) + 1) : 1;
-            var currentSeller = _sellerService.GetSellersList().Find(x => x.Id == sellerId);
+
+            var orderId = sales.Any() ? (sales.Max(x => x.Id) + 1) : 1;
+            var sellerId = sale.Seller.Id > 0 ? sale.Seller.Id : 1;
+            var currentSeller = _sellerService.GetSeller(sellerId);
+
+            sale.Id = orderId;
+            sale.Seller.Id = sellerId;
 
             if (currentSeller != null)
-            {
-                currentSeller.Cpf = seller.Cpf ?? currentSeller.Cpf;
-                currentSeller.Name = seller.Name ?? currentSeller.Name;
-                currentSeller.Email = seller.Email ?? currentSeller.Email;
-                currentSeller.PhoneNumber = seller.PhoneNumber ?? currentSeller.PhoneNumber;
-            }
+                sale.Seller = _sellerService.UpdateSeller(sale.Seller);
             else
-            {
-                seller.Id = sellerId;
-                currentSeller = seller;
+                _sellerService.AddSeller(sale.Seller);
 
-                _sellerService.CreateSeller(currentSeller);
-            }
+            _saleService.AddSale(sale);
 
-            var sale = _saleService.CreateSale(orderId, currentSeller, products);
-
-            return CreatedAtAction(nameof(RegisterSale), null, sale);
+            return Ok(sale);
         }
 
-        [HttpGet("GetSaleById")]
+        [HttpGet("{orderId:int}")]
         [ProducesResponseType(typeof(Sale), StatusCodes.Status200OK)]
-        public IActionResult GetSaleById(int id)
+        public IActionResult ObterPorId(int orderId)
         {
-            var sale = _saleService.GetSalesList().Find(s => s.Id == id);
+            var sale = _saleService.GetSale(orderId);
 
             if (sale == null)
                 return NotFound();
@@ -66,7 +63,7 @@
         [HttpPost("UpdateSaleStatus")]
         public IActionResult UpdateSaleStatus([Required] int orderId, [Required] EnumSaleStatus saleStatus)
         {
-            var sale = _saleService.GetSalesList().Find(x => x.Id == orderId);
+            var sale = _saleService.GetSale(orderId);
 
             if (sale == null)
                 return NotFound();
@@ -74,17 +71,6 @@
             var response = _saleService.UpdateSaleStatus(sale, saleStatus);
 
             return Ok(response.Last() ?? response.First());
-        }
-
-        [HttpGet("{orderId:int}")]
-        public IActionResult ObterPorId(int orderId)
-        {
-            var sale = _saleService.GetSalesList().Find(x => x.Id == orderId);
-
-            if (sale == null)
-                return NotFound();
-
-            return Ok(sale);
         }
     }
 }
