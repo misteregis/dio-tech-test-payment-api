@@ -1,40 +1,37 @@
-﻿namespace PaymentAPI.Models
+﻿using System.Runtime.Serialization;
+
+namespace PaymentAPI.Models;
+
+/// <summary>
+///     Modelo de esquema de status
+/// </summary>
+public enum EnumSaleStatus
 {
-    using System.Runtime.Serialization;
+    /// <summary>
+    ///     Aguardando pagamento
+    /// </summary>
+    [EnumMember(Value = "Aguardando pagamento")]
+    PendingPayment,
 
     /// <summary>
-    /// Modelo de esquema de status
+    ///     Pagamento aprovado
     /// </summary>
-    public enum EnumSaleStatus
-    {
-        /// <summary>
-        /// Aguardando pagamento
-        /// </summary>
-        [EnumMember(Value = "Aguardando pagamento")]
-        PendingPayment,
+    [EnumMember(Value = "Pagamento aprovado")]
+    ApprovedPayment,
 
-        /// <summary>
-        /// Pagamento aprovado
-        /// </summary>
-        [EnumMember(Value = "Pagamento aprovado")]
-        ApprovedPayment,
+    /// <summary>
+    ///     Enviado para transportadora
+    /// </summary>
+    [EnumMember(Value = "Enviado para transportadora")]
+    SentToCarrier,
 
-        /// <summary>
-        /// Enviado para transportadora
-        /// </summary>
-        [EnumMember(Value = "Enviado para transportadora")]
-        SentToCarrier,
+    /// <summary>
+    ///     Entregue
+    /// </summary>
+    [EnumMember(Value = "Entregue")] Delivered,
 
-        /// <summary>
-        /// Entregue
-        /// </summary>
-        [EnumMember(Value = "Entregue")]
-        Delivered,
-
-        /// <summary>
-        /// Cancelada
-        /// </summary>
-        [EnumMember(Value = "Cancelada")]
-        Canceled
-    }
+    /// <summary>
+    ///     Cancelada
+    /// </summary>
+    [EnumMember(Value = "Cancelada")] Canceled
 }

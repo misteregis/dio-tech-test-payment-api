@@ -1,6 +1,5 @@
-﻿namespace PaymentAPI.Resources
+﻿namespace PaymentAPI.Resources;
+
+public class DataAnnotations
 {
-    public class DataAnnotations
-    {
-    }
 }

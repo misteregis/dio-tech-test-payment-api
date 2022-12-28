@@ -1,22 +1,21 @@
-﻿namespace PaymentAPI.Models
+﻿using Newtonsoft.Json;
+
+namespace PaymentAPI.Models;
+
+/// <summary>
+///     Modelo de esquema de produto
+/// </summary>
+public class Product
 {
-    using Newtonsoft.Json;
+    public Product(string name)
+    {
+        Name = name;
+    }
 
     /// <summary>
-    /// Modelo de esquema de produto
+    ///     Nome e/ou descrição do produto
     /// </summary>
-    public class Product
-    {
-        /// <summary>
-        /// Nome e/ou descrição do produto
-        /// </summary>
-        /// <example>Produto 1</example>
-        [JsonRequired]
-        public string Name { get; set; }
-
-        public Product(string name)
-        {
-            Name = name;
-        }
-    }
+    /// <example>Produto 1</example>
+    [JsonRequired]
+    public string Name { get; set; }
 }

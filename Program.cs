@@ -1,8 +1,8 @@
+using System.Reflection;
+using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using PaymentAPI.Resources;
 using PaymentAPI.Schemas;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;

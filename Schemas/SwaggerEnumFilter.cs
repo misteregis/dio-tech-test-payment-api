@@ -1,49 +1,44 @@
-﻿namespace PaymentAPI.Schemas
+﻿using System.Xml.Linq;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
+
+namespace PaymentAPI.Schemas;
+
+public class SwaggerEnumFilter : ISchemaFilter
 {
-    using Microsoft.OpenApi.Any;
-    using Microsoft.OpenApi.Models;
-    using Swashbuckle.AspNetCore.SwaggerGen;
-    using System.Xml.Linq;
+    private readonly XDocument _xmlComments;
 
-    public class SwaggerEnumFilter : ISchemaFilter
+    public SwaggerEnumFilter(string xmlPath)
     {
-        private readonly XDocument _xmlComments;
+        if (File.Exists(xmlPath)) _xmlComments = XDocument.Load(xmlPath);
+    }
 
-        public SwaggerEnumFilter(string xmlPath)
+    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    {
+        if (_xmlComments == null) return;
+
+        if (schema.Enum is not { Count: > 0 } || context.Type is not { IsEnum: true }) return;
+
+        schema.Description += "<p>Members:</p><ul>";
+
+        var fullTypeName = context.Type.FullName;
+
+        foreach (var enumMemberName in schema.Enum.OfType<OpenApiString>().Select(v => v.Value))
         {
-            if (File.Exists(xmlPath))
-            {
-                _xmlComments = XDocument.Load(xmlPath);
-            }
+            var fullEnumMemberName = $"F:{fullTypeName}.{enumMemberName}";
+
+            var enumMemberComments = _xmlComments.Descendants("member")
+                .FirstOrDefault(m => m.Attribute("name")!.Value.Equals
+                    (fullEnumMemberName, StringComparison.OrdinalIgnoreCase));
+
+            var summary = enumMemberComments?.Descendants("summary").FirstOrDefault();
+
+            if (summary == null) continue;
+
+            schema.Description += $"<li><i>{enumMemberName}</i> - {summary.Value.Trim()}</li>";
         }
 
-        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
-        {
-            if (_xmlComments == null) return;
-
-            if (schema.Enum is not { Count: > 0 } || context.Type is not { IsEnum: true }) return;
-
-            schema.Description += "<p>Members:</p><ul>";
-
-            var fullTypeName = context.Type.FullName;
-
-            foreach (var enumMemberName in schema.Enum.OfType<OpenApiString>().
-                         Select(v => v.Value))
-            {
-                var fullEnumMemberName = $"F:{fullTypeName}.{enumMemberName}";
-
-                var enumMemberComments = _xmlComments.Descendants("member")
-                    .FirstOrDefault(m => m.Attribute("name")!.Value.Equals
-                        (fullEnumMemberName, StringComparison.OrdinalIgnoreCase));
-
-                var summary = enumMemberComments?.Descendants("summary").FirstOrDefault();
-
-                if (summary == null) continue;
-
-                schema.Description += $"<li><i>{enumMemberName}</i> - {summary.Value.Trim()}</li>";
-            }
-
-            schema.Description += "</ul>";
-        }
+        schema.Description += "</ul>";
     }
 }
