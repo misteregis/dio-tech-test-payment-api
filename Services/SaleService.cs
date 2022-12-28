@@ -4,16 +4,41 @@
     using Extensions;
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Modelo de esquema de serviço de venda
+    /// </summary>
     public class SaleService
     {
+        /// <summary>
+        /// Lista contendo as vendas
+        /// </summary>
         private readonly List<Sale> _salesList = new();
 
+        /// <summary>
+        /// Obtém uma lista com as vendas efetuadas
+        /// </summary>
+        /// <returns>Lista de vendas</returns>
         public List<Sale> GetSalesList() => _salesList;
 
+        /// <summary>
+        /// Obtém uma venda passando o id
+        /// </summary>
+        /// <param name="id">ID do pedido/venda.</param>
+        /// <returns>A venda.</returns>
         public Sale GetSale(int id) => _salesList.Find(s => s.Id == id);
 
+        /// <summary>
+        /// Adiciona uma nova venda à lista
+        /// </summary>
+        /// <param name="sale">A venda.</param>
         public void AddSale(Sale sale) => _salesList.Add(sale);
 
+        /// <summary>
+        /// Atualiza o status da venda
+        /// </summary>
+        /// <param name="sale">A venda.</param>
+        /// <param name="saleStatus">O status.</param>
+        /// <returns>Um objeto contendo a venda e uma mensagem de erro (caso exista).</returns>
         public object[] UpdateSaleStatus(Sale sale, EnumSaleStatus saleStatus)
         {
             object[] response = { sale, null };

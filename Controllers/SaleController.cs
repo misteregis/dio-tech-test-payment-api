@@ -20,15 +20,16 @@
             _saleService = saleServiceOptions.Value;
         }
 
-        [HttpPost]
-        public IActionResult RegisterSale([Required] Sale sale)
+        /// <summary>
+        /// Registra uma nova venda
+        /// </summary>
+        /// <param name="sale">A venda.</param>
+        /// <returns>A venda efetuda.</returns>
+        /// <response code="201">Retorna a venda recém-criada.</response>
+        /// <response code="400">Solicitação inválida.</response>
+        [HttpPost, ProducesResponseType(StatusCodes.Status201Created)]
+        public IActionResult RegisterSale(Sale sale)
         {
-            if (sale.Seller == null)
-                return BadRequest(new { message = "É obrigatório um vendedor!" });
-
-            if (!sale.Products.Any())
-                return BadRequest(new { message = "É obrigatório ter ao menos um produto!" });
-
             var sales = _saleService.GetSalesList();
 
             var orderId = sales.Any() ? (sales.Max(x => x.Id) + 1) : 1;
@@ -45,11 +46,17 @@
 
             _saleService.AddSale(sale);
 
-            return Ok(sale);
+            return CreatedAtAction(nameof(RegisterSale), sale);
         }
 
+        /// <summary>
+        /// Obtém um pedido/venda passando um id
+        /// </summary>
+        /// <param name="orderId" example="1">ID do pedido.</param>
+        /// <returns>A venda (se encontrado).</returns>
+        /// <response code="200">Retorna a venda.</response>
+        /// <response code="404">Venda não encontrada.</response>
         [HttpGet("{orderId:int}")]
-        [ProducesResponseType(typeof(Sale), StatusCodes.Status200OK)]
         public IActionResult ObterPorId(int orderId)
         {
             var sale = _saleService.GetSale(orderId);
@@ -60,6 +67,14 @@
             return Ok(sale);
         }
 
+        /// <summary>
+        /// Atualiza o status do pedido/venda
+        /// </summary>
+        /// <param name="orderId" example="1">ID do pedido/venda.</param>
+        /// <param name="saleStatus">Status do pedido/venda.</param>
+        /// <returns>A venda, em caso de falha irá retornar a mensagem com os erros.</returns>
+        /// <response code="200">Retorna a venda ou uma mensagem de erro em caso de falha.</response>
+        /// <response code="404">Venda não encontrada.</response>
         [HttpPost("UpdateSaleStatus")]
         public IActionResult UpdateSaleStatus([Required] int orderId, [Required] EnumSaleStatus saleStatus)
         {

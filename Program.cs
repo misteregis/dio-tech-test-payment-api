@@ -1,15 +1,23 @@
 using Microsoft.OpenApi.Models;
+using PaymentAPI.Resources;
 using PaymentAPI.Schemas;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+var services = builder.Services;
+var controllers = services.AddControllers();
 
-builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+controllers.AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+controllers.AddDataAnnotationsLocalization(options =>
+{
+    options.DataAnnotationLocalizerProvider = (_, factory) =>
+        factory.Create(typeof(DataAnnotations));
+});
 
-builder.Services.AddControllers().AddNewtonsoftJson();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+controllers.AddNewtonsoftJson();
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
@@ -18,7 +26,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Projeto para a realização de teste técnico da DIO.",
         Contact = new OpenApiContact
         {
-            Name = "Link do projeto original",
+            Name = "Link do projeto — @Pottencial",
             Url = new Uri("https://gitlab.com/Pottencial/tech-test-payment-api")
         }
     });
